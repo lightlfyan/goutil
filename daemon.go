@@ -1,11 +1,12 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os/exec"
-    "flag"
 )
-var cmd *string = flag.String("cmd", "ls", "cmd")
+
+var cmd = flag.String("cmd", "ls", "cmd")
 
 func spawn(exePath string, counter int) error {
 	fmt.Println("start ", exePath, counter)
@@ -19,19 +20,18 @@ func spawn(exePath string, counter int) error {
 }
 
 func main() {
-    flag.Parse()
-    fmt.Println(*cmd)
-    return
+	flag.Parse()
+	fmt.Println(*cmd)
 
 	counter := 0
-    exePath := *cmd
-	#exePath := "./bin/master 1>master.log 2>&1"
+	exePath := *cmd
+	// exePath := "./bin/master 1>master.log 2>&1"
 	for {
 		err := spawn(exePath, counter)
 		if err != nil {
 			fmt.Printf("spawn error: %s\n", err)
 			return
 		}
-		counter += 1
+		counter++
 	}
 }
