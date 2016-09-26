@@ -5,30 +5,38 @@ import (
 	"net"
 	"os"
 	"syscall"
-	"time"
 )
 
+var procchan = make(chan *syscall.ProcAttr, 100)
+
 func fork(spec *syscall.ProcAttr) {
-	pid, _ := syscall.ForkExec("dumpworker", []string{}, spec)
+	pid, err := syscall.ForkExec("./worker", []string{}, spec)
+	if err != nil {
+		fmt.Println(err)
+	}
+
 	p, _ := os.FindProcess(pid)
 	fmt.Println(p)
+	p.Wait()
+
+	procchan <- spec
 }
 
 func main() {
 	addr, _ := net.ResolveTCPAddr("tcp4", "127.0.0.1:8000")
 	l, _ := net.ListenTCP("tcp4", addr)
 	fd, _ := l.File()
-	fds := []uintptr{fd.Fd()}
+
+	fds := []uintptr{os.Stdin.Fd(), os.Stdout.Fd(), os.Stderr.Fd(), fd.Fd()}
 
 	execSpec := &syscall.ProcAttr{
-		Dir:   "/Users/snow/Downloads/testfd/",
+		Dir:   "/Users/snow/yan/lab/git/goutil",
 		Env:   os.Environ(),
 		Files: fds,
 	}
+	procchan <- execSpec
 
-	for i := 0; i < 2; i++ {
-		go fork(execSpec)
+	for spec := range procchan {
+		go fork(spec)
 	}
-
-	time.Sleep(time.Second * 3)
 }
