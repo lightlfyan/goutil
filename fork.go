@@ -28,12 +28,11 @@ START:
 
 func run(fd *os.File) {
 
-	path := "/Users/snow/yan/lab/git/goutil/worker"
+	path := "/Users/snow/Downloads/afclient.py"
 	cmd := exec.Command(path, ">>./log")
-	// cmd.Stdin = os.Stdin
+	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-
 	cmd.ExtraFiles = []*os.File{fd}
 	keeprun(cmd)
 }
